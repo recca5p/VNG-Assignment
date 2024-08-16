@@ -123,15 +123,15 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i $EC2_KEY_PATH $EC2_USER@$EC2_HOST <<EOF
             # Clean up previous containers and images
-            docker stop vng-app || true
-            docker rm -f vng-app || true
-            docker rmi -f $DOCKER_IMAGE || true
+            sudo docker stop vng-app || true
+            sudo docker rm -f vng-app || true
+            sudo docker rmi -f $DOCKER_IMAGE || true
             
             # Pull the new Docker image
-            docker pull $DOCKER_IMAGE
+            sudo docker pull $DOCKER_IMAGE
             
             # Run the new container with Nginx and Let's Encrypt
-            docker run -dp 3000:8080 \
+            sudo docker run -dp 3000:8080 \
               --name vng-app \
               --mount type=volume,source=letsencrypt,target=/etc/letsencrypt \
               $DOCKER_IMAGE
