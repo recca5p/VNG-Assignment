@@ -1,6 +1,0 @@
-@VNG_Assignment_HostAddress = http://localhost:5104
-
-GET {{VNG_Assignment_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
