@@ -119,7 +119,7 @@ jobs:
           EC2_USER: ubuntu
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_KEY_PATH: ~/.ssh/ec2-key.pem
-          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/vng-app:${{ github.sha }}
+          DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/vng-api:${{ github.sha }}
         run: |
           ssh -o StrictHostKeyChecking=no -i $EC2_KEY_PATH $EC2_USER@$EC2_HOST <<EOF
             # Clean up previous containers and images
