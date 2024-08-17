@@ -51,6 +51,21 @@ jobs:
           DATABASE_CONNECTION_STRING: ${{ secrets.DATABASE_CONNECTION_STRING }}
 
           
+      - name: Inject hashkey secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
+        env:
+          AppSettings.JwtSettings:Key: ${{ secrets.HASHKEY }}
+
+      - name: Inject aws access key secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
+        env:
+          AppSettings.AWS:AccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AppSettings.AWS:SecretKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Inject DB secrets to application
         uses: microsoft/variable-substitution@v1
         with:
