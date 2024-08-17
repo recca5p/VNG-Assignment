@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,5 +15,7 @@ namespace Services.Abstractions
         Task<UserModel> CreateAsync(UserCreateRequest user, CancellationToken cancellationToken = default);
         Task UpdateAsync(Guid ownerId, UserUpdateRequest user, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid ownerId, CancellationToken cancellationToken = default);
+        Task<string> AuthenticateAsync(UserSignInRequest request, CancellationToken cancellationToken = default);
+        ClaimsPrincipal ValidateToken(string token);
     }
 }

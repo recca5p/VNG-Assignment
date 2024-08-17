@@ -19,4 +19,10 @@ public sealed class UserRepository : IUserRepository
     public void Insert(User user) => _dbContext.Users.Add(user);
     
     public void Remove(User user) => _dbContext.Users.Remove(user);
+
+    public async Task<User> GetUserByEmailAndPassword(User user, CancellationToken cancellationToken) =>
+        await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == user.Email && x.Password == user.Password, cancellationToken);
+    
+    public async Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
+        await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
 }

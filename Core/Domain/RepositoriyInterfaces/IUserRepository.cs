@@ -13,5 +13,7 @@ namespace Domain.RepositoriyInterfaces
         Task<User> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default);
         void Insert(User user);
         void Remove(User user);
+        Task<User> GetUserByEmailAndPassword(User user, CancellationToken cancellationToken);
+        Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
     }
 }

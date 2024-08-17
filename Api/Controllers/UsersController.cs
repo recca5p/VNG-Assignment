@@ -6,67 +6,39 @@ using Services.Abstractions;
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("api/owners")]
-    public class UsersController : ControllerBase
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
     {
         private readonly IServiceManager _serviceManager;
 
-        public UsersController(IServiceManager serviceManager) => _serviceManager = serviceManager;
+        public AuthController(IServiceManager serviceManager) => _serviceManager = serviceManager;
 
-        [HttpGet]
-        public async Task<IActionResult> GetUsers(CancellationToken cancellationToken)
+        [HttpPost("signup")]
+        public async Task<IActionResult> SignUp([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
         {
-            var users = await _serviceManager.UserService.GetAllAsync(cancellationToken);
+            var user = await _serviceManager.UserService.CreateAsync(request, cancellationToken);
 
-            ApiResponse<IEnumerable<UserModel>> response = new ApiResponse<IEnumerable<UserModel>>()
+            return Ok(new ApiResponse<string>
+            {
+                Success = true,
+                StatusCode = StatusCodes.Status201Created,
+                Message = "User registered successfully.",
+                Data = string.Empty
+            });
+        }
+
+        [HttpPost("signin")]
+        public async Task<IActionResult> SignIn([FromBody] UserSignInRequest request, CancellationToken cancellationToken)
+        {
+            var token = await _serviceManager.UserService.AuthenticateAsync(request, cancellationToken);
+
+            return Ok(new ApiResponse<string>
             {
                 Success = true,
                 StatusCode = StatusCodes.Status200OK,
-                Message = "Success",
-                Data = users
-            };
-
-            return Ok(response);
-        }
-
-        [HttpGet("{userId:guid}")]
-        public async Task<IActionResult> GetUserById(Guid userId, CancellationToken cancellationToken)
-        {
-            var ownerDto = await _serviceManager.UserService.GetByIdAsync(userId, cancellationToken);
-
-            ApiResponse<UserModel> response = new ApiResponse<UserModel>()
-            {
-                Success = true,
-                StatusCode = StatusCodes.Status200OK,
-                Message = "Success",
-                Data = ownerDto
-            };
-
-            return Ok(response);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] UserCreateRequest request)
-        {
-            var user = await _serviceManager.UserService.CreateAsync(request);
-
-            return NoContent();
-        }
-
-        [HttpPut("{userId:guid}")]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserUpdateRequest request, CancellationToken cancellationToken)
-        {
-            await _serviceManager.UserService.UpdateAsync(userId, request, cancellationToken);
-
-            return NoContent();
-        }
-
-        [HttpDelete("{userId:guid}")]
-        public async Task<IActionResult> DeleteOwner(Guid userId, CancellationToken cancellationToken)
-        {
-            await _serviceManager.UserService.DeleteAsync(userId, cancellationToken);
-
-            return NoContent();
+                Message = "Sign-in successful.",
+                Data = token
+            });
         }
     }
 }

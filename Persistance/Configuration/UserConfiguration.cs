@@ -18,6 +18,7 @@ namespace Persistance.Configuration
             builder.HasKey(u => u.Id);
             builder.Property(u => u.Id).ValueGeneratedOnAdd();
             builder.Property(u => u.Email).IsRequired();
+            builder.HasIndex(u => u.Email).IsUnique();
             builder.Property(u => u.Password).IsRequired();
         }
     }

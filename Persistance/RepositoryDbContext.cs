@@ -25,11 +25,13 @@ namespace Persistance
         
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                optionsBuilder.UseSqlServer(connectionString);
-            }
+            // var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING");
+            // if (!string.IsNullOrEmpty(connectionString))
+            // {
+            //     optionsBuilder.UseSqlServer("Server=103.166.182.81,1433;Database=vng;User ID=sa;Password=12345Abc%;Pooling=true;Min Pool Size=0;Max Pool Size=200;Connect Timeout=60;Application Name=AppName;Encrypt=False;");
+            // }
+            optionsBuilder.UseSqlServer("Server=103.166.182.81,1433;Database=vng;User ID=sa;Password=12345Abc%;Pooling=true;Min Pool Size=0;Max Pool Size=200;Connect Timeout=60;Application Name=AppName;Encrypt=False;");
+
         }
 
         public DbSet<User> Users { get; set; }

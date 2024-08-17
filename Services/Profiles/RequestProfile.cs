@@ -12,6 +12,7 @@ public class RequestProfile : Profile
 
         CreateMap<UserCreateRequest, User>();
         CreateMap<UserUpdateRequest, User>();
+        CreateMap<UserSignInRequest, User>();
 
         #endregion
     }
