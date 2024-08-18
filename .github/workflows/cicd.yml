@@ -78,7 +78,7 @@ jobs:
         with:
           files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
         env:
-          AppSettings.DatabaseConnectionString: ${{ secrets.HOST_API }}
+          AppSettings.ApiHost: ${{ secrets.HOST_API }}
           
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
