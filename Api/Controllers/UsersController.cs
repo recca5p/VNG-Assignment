@@ -18,28 +18,50 @@ namespace Api.Controllers
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] UserCreateRequest request, CancellationToken cancellationToken)
         {
-            var user = await _serviceManager.UserService.CreateAsync(request, cancellationToken);
-
-            return Ok(new ApiResponse<string>
+            try
             {
-                Success = true,
-                StatusCode = StatusCodes.Status201Created,
-                Message = "User registered successfully.",
-                Data = string.Empty
-            });
+                var user = await _serviceManager.UserService.CreateAsync(request, cancellationToken);
+
+                return Ok(new ApiResponse<string>
+                {
+                    Success = true,
+                    StatusCode = StatusCodes.Status201Created,
+                    Message = "User registered successfully.",
+                    Data = string.Empty
+                });
+            }
+            catch (Exception e)
+            {
+                if (e.Message.Contains("Failed to send"))
+                {
+                    return Ok(new ApiResponse<string>
+                    {
+                        Success = true,
+                        StatusCode = StatusCodes.Status201Created,
+                        Message = e.Message,
+                        Data = string.Empty
+                    });
+                }
+
+                throw;
+            }
         }
 
         [HttpPost("signin")]
         public async Task<IActionResult> SignIn([FromBody] UserSignInRequest request, CancellationToken cancellationToken)
         {
-            var token = await _serviceManager.UserService.AuthenticateAsync(request, cancellationToken);
+            var (token, userId) = await _serviceManager.UserService.AuthenticateAsync(request, cancellationToken);
 
-            return Ok(new ApiResponse<string>
+            return Ok(new ApiResponse<UserSignInResponse>
             {
                 Success = true,
                 StatusCode = StatusCodes.Status200OK,
                 Message = "Sign-in successful.",
-                Data = token
+                Data = new UserSignInResponse ()
+                {
+                    Token = token,
+                    UserId = userId
+                }
             });
         }
         

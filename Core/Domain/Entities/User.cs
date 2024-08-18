@@ -13,15 +13,6 @@ namespace Domain.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public UserStatus Status { get; set; }
-        
-        public User() {}
-
-        public User(Guid id, string email, string password, UserStatus status)
-        {
-            Id = id;
-            Email = email;
-            Password = password;
-            Status = status;
-        }
+        public ICollection<Book> Books = new HashSet<Book>();
     }
 }

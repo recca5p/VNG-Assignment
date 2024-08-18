@@ -1,4 +1,5 @@
 using AutoMapper;
+using Contract.DTOs.Books;
 using Contract.DTOs.Users;
 using Domain.Entities;
 
@@ -13,6 +14,13 @@ public class RequestProfile : Profile
         CreateMap<UserCreateRequest, User>();
         CreateMap<UserUpdateRequest, User>();
         CreateMap<UserSignInRequest, User>();
+
+        #endregion
+        
+        #region Book
+
+        CreateMap<BookCreateRequest, Book>();
+        CreateMap<BookUpdateRequest, Book>();
 
         #endregion
     }

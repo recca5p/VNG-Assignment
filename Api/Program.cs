@@ -100,6 +100,9 @@ builder.Services.AddQuartz(q =>
             case "SendEmailToResetPasswordJob":
                 q.AddJob<SendEmailToResetPasswordJob>(opts => opts.WithIdentity(jobConfig.JobName));
                 break;
+            case "BookCacheUpdaterServiceJob":
+                q.AddJob<BookCacheUpdaterServiceJob>(opts => opts.WithIdentity(jobConfig.JobName));
+                break;
             default:
                 throw new ArgumentException($"Unknown job type: {jobConfig.JobName}");
         }
@@ -116,6 +119,8 @@ builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 builder.Services.AddSingleton<IAmazonSimpleEmailService>(new AmazonSimpleEmailServiceClient(
     RegionEndpoint.APSoutheast1
 ));
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

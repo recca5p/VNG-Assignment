@@ -110,9 +110,11 @@ namespace Services
         }
 
 
-        public async Task<string> AuthenticateAsync(UserSignInRequest request,
+        public async Task<(string, Guid)> AuthenticateAsync(UserSignInRequest request,
             CancellationToken cancellationToken = default)
         {
+            request.Password = PasswordHashHelper.HashPassword(request.Password);
+            
             User user = _mapper.Map<UserSignInRequest, User>(request);
 
             User userExist = await _repositoryManager.UserRepository.GetUserByEmailAndPassword(user, cancellationToken);
@@ -120,9 +122,15 @@ namespace Services
             if (userExist is null)
                 throw new UserEmailOrPasswordException();
 
+            if (user.Status is UserStatus.Verified)
+                throw new UserNeededToVerifyException(user.Email);
+            
+            if (user.Status is UserStatus.RequiredChangePwd || user.Status is UserStatus.IsSendChangeEmail)
+                throw new UserNeededToChangePasswordException(user.Email);
+
             string token = TokenService.GenerateToken(userExist.Id, userExist.Email, _appSettings.JwtSettings.Key, _appSettings.JwtSettings.ExpiryMinutes);
 
-            return token;
+            return (token, userExist.Id);
         }
         public async Task<bool> ValidateUser(string token)
         {

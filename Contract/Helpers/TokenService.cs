@@ -77,7 +77,7 @@ public static class TokenService
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            ValidateLifetime = false, // We just want to extract the claims, so no need to validate lifetime
+            ValidateLifetime = false, 
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
         };

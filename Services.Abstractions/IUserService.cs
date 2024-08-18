@@ -15,7 +15,9 @@ namespace Services.Abstractions
         Task<UserModel> CreateAsync(UserCreateRequest user, CancellationToken cancellationToken = default);
         Task UpdateAsync(Guid ownerId, UserUpdateRequest user, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid ownerId, CancellationToken cancellationToken = default);
-        Task<string> AuthenticateAsync(UserSignInRequest request, CancellationToken cancellationToken = default);
+
+        Task<(string, Guid)> AuthenticateAsync(UserSignInRequest request,
+            CancellationToken cancellationToken = default);
         Task<bool> ValidateUser(string token);
         Task UpdateUsersStatusNeededToBeResetPassword();
         Task SendUsersNeededChangePwd();

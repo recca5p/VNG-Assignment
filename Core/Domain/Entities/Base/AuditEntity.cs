@@ -11,9 +11,9 @@ namespace Domain.Entities.Base
     {
         public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
         public String CreatedByName { get; set; } = String.Empty;
-        public Int64 CreatedById { get; set; } = 0;
+        public Guid CreatedById { get; set; }
         public DateTime? UpdatedTime { get; set; }
         public String? UpdatedByName { get; set; }
-        public Int64? UpdateById { get; set; }
+        public Guid? UpdateById { get; set; }
     }
 }

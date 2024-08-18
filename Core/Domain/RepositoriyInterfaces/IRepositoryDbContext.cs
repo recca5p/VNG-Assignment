@@ -24,4 +24,5 @@ public partial interface IRepositoryDbContext
     #endregion
     
     public DbSet<User> Users { get; set; }
+    public DbSet<Book> Books { get; set; }
 }
