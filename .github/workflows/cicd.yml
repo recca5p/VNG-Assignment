@@ -50,21 +50,13 @@ jobs:
           DOTNET_ENVIRONMENT: Production
           DATABASE_CONNECTION_STRING: ${{ secrets.DATABASE_CONNECTION_STRING }}
 
-          
-      - name: Inject hashkey secrets to application
-        uses: microsoft/variable-substitution@v1
-        with:
-          files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
-        env:
-          AppSettings.JwtSettings:Key: ${{ secrets.HASHKEY }}
-
       - name: Inject aws access key secrets to application
         uses: microsoft/variable-substitution@v1
         with:
           files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
         env:
-          AppSettings.AWS:AccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AppSettings.AWS:SecretKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AppSettings.AWS.AccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AppSettings.AWS.SecretKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Inject DB secrets to application
         uses: microsoft/variable-substitution@v1
@@ -72,6 +64,20 @@ jobs:
           files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
         env:
           AppSettings.DatabaseConnectionString: ${{ secrets.DATABASE_CONNECTION_STRING }}
+
+      - name: Inject api hosts secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
+        env:
+          AppSettings.ApiHost: ${{ secrets.HOST_API }}
+
+      - name: Inject hashkey secrets to application
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: "${{ github.workspace }}/${{ env.WORKING_DIRECTORY }}/appsettings.Development.json"
+        env:
+          AppSettings.JwtSettings.Key: ${{ secrets.HASHKEY }}
           
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
