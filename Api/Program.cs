@@ -92,12 +92,20 @@ builder.Services.AddQuartz(q =>
     q.UseMicrosoftDependencyInjectionJobFactory();
     foreach (var jobConfig in jobsConfig)
     {
-        var jobKey = new JobKey($"{jobConfig.JobName}");
-
-        q.AddJob<ResetUserJob>(opts => opts.WithIdentity(jobKey));
-                
+        switch (jobConfig.JobName)
+        {
+            case "ResetUserJob":
+                q.AddJob<ResetUserJob>(opts => opts.WithIdentity(jobConfig.JobName));
+                break;
+            case "SendEmailToResetPasswordJob":
+                q.AddJob<SendEmailToResetPasswordJob>(opts => opts.WithIdentity(jobConfig.JobName));
+                break;
+            default:
+                throw new ArgumentException($"Unknown job type: {jobConfig.JobName}");
+        }
+        
         q.AddTrigger(opts => opts
-            .ForJob(jobKey)
+            .ForJob(jobConfig.JobName)
             .WithIdentity($"{jobConfig.JobName}-trigger")
             .WithCronSchedule(jobConfig.CronExpression));
     }

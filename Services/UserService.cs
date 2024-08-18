@@ -5,6 +5,7 @@ using Amazon;
 using Amazon.SimpleEmail;
 using AutoMapper;
 using Contract.DTOs.Users;
+using Contract.Enum;
 using Contract.Exceptions.Users;
 using Contract.Helpers;
 using Contract.Models;
@@ -64,12 +65,18 @@ namespace Services
                 throw new UserExistException(userRequest.Email);
             
             User user = _mapper.Map<UserCreateRequest, User>(userRequest);
+            
+            user.Id = Guid.NewGuid();
         
             _repositoryManager.UserRepository.Insert(user);
         
             await _repositoryManager.UnitOfWork.SaveChangesAsync(cancellationToken);
+            
+            string token = TokenService.GenerateToken(user.Id, user.Email, _appSettings.JwtSettings.Key, _appSettings.JwtSettings.ExpiryMinutes);
+            
+            string verificationLink = $"{_appSettings.ApiHost}api/auth/verify-email?token={token}";
 
-            await EmailHelper.SendEmailAsync(userRequest.Email, "Verify email", "Please verify the email");
+            await EmailHelper.SendEmailAsync(userRequest.Email, "Verify your email", $"Please verify your email by clicking <a href=\"{verificationLink}\">here</a>.");
             
             return _mapper.Map<User, UserModel>(user);
         }
@@ -117,22 +124,62 @@ namespace Services
 
             return token;
         }
-        public ClaimsPrincipal ValidateToken(string token)
+        public async Task<bool> ValidateUser(string token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.JwtSettings.Key);
+            var isValid = TokenService.ValidateToken(token, _appSettings.JwtSettings.Key);
 
-            var validationParameters = new TokenValidationParameters
+            if (!isValid)
+                throw new UnauthorizedAccessException("Token is not valid");
+
+            Guid userId = TokenService.GetUserIdFromToken(token, _appSettings.JwtSettings.Key);
+
+            User user = await _repositoryManager.UserRepository.GetByIdAsync(userId);
+
+            user.Status = UserStatus.Verified;
+            user.UpdatedTime = DateTime.UtcNow;
+
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
+
+            return isValid;
+        }
+
+        public async Task UpdateUsersStatusNeededToBeResetPassword()
+        {
+            IEnumerable<User> users =
+                await _repositoryManager.UserRepository.GetUsersNeededToBeResetPassword(_appSettings
+                    .ResetPasswordTimeInSeconds);
+            
+            foreach (User user in users)
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-            };
+                user.Status = UserStatus.RequiredChangePwd;
+                user.UpdatedTime = DateTime.UtcNow;
+            }
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-            return principal;
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
+        }
+        
+        public async Task SendUsersNeededChangePwd()
+        {
+            IEnumerable<User> users =
+                await _repositoryManager.UserRepository.GetUsersNeededToBeResetPasswordEMail();
+            
+            foreach (User user in users)
+            {
+                string emailSubject = "Reset your password";
+                string emailBody = $@"
+                    Please reset your password by clicking
+                            <br/><br/>
+                            Note: This is just a mock email, and there is no actual web form to fill out. 
+                        The link provided will not work as there is no front-end implemented for this feature.
+                            <br/><br/>
+                            If you did not request a password reset, please ignore this email.";
+
+                await EmailHelper.SendEmailAsync(user.Email, emailSubject, emailBody);   
+                user.Status = UserStatus.IsSendChangeEmail;
+                user.UpdatedTime = DateTime.UtcNow;
+            }
+
+            await _repositoryManager.UnitOfWork.SaveChangesAsync();
         }
     }
 }

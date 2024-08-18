@@ -32,14 +32,10 @@ public class AuthenticateMiddleware
         {
             try
             {
-                var principal = TokenService.ValidateToken(token, _appSettings.JwtSettings.Key);
+                var isValid = TokenService.ValidateToken(token, _appSettings.JwtSettings.Key);
 
-                if (principal != null)
-                {
-                    context.User = principal;
+                if (isValid)
                     await _next(context);
-                    return;
-                }
             }
             catch
             {

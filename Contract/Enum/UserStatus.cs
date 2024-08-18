@@ -11,6 +11,7 @@ namespace Contract.Enum
         Created,
         Verified,
         RequiredChangePwd,
+        IsSendChangeEmail,
         InActive
     }
 }

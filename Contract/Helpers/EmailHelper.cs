@@ -37,7 +37,7 @@ public static class EmailHelper
                 Subject = new Content(subject),
                 Body = new Body
                 {
-                    Text = new Content(body)
+                    Html = new Content(body)
                 }
             }
         };

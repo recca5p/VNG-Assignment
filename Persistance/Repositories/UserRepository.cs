@@ -1,3 +1,4 @@
+using Contract.Enum;
 using Domain.Entities;
 using Domain.RepositoriyInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -25,4 +26,12 @@ public sealed class UserRepository : IUserRepository
     
     public async Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
         await _dbContext.Users.FirstOrDefaultAsync(x => x.Email == email, cancellationToken);
+
+    public async Task<IEnumerable<User>> GetUsersNeededToBeResetPassword(int intervalTimeInSeconds, CancellationToken cancellationToken = default) =>
+        await _dbContext.Users.Where(u => u.Status == UserStatus.Verified && u.UpdatedTime.Value.AddSeconds(intervalTimeInSeconds) <= DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+    
+    public async Task<IEnumerable<User>> GetUsersNeededToBeResetPasswordEMail(CancellationToken cancellationToken = default) =>
+        await _dbContext.Users.Where(u => u.Status == UserStatus.RequiredChangePwd)
+            .ToListAsync(cancellationToken);
 }

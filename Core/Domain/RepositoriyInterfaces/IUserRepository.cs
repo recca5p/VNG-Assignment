@@ -15,5 +15,10 @@ namespace Domain.RepositoriyInterfaces
         void Remove(User user);
         Task<User> GetUserByEmailAndPassword(User user, CancellationToken cancellationToken);
         Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<User>> GetUsersNeededToBeResetPassword(int intervalTimeInSeconds,
+            CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<User>> GetUsersNeededToBeResetPasswordEMail(CancellationToken cancellationToken = default);
     }
 }

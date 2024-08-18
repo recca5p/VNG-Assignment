@@ -29,7 +29,7 @@ public static class TokenService
         return tokenHandler.WriteToken(token);
     }
         
-    public static ClaimsPrincipal ValidateToken(string token, string keyString)
+    public static bool ValidateToken(string token, string keyString)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(keyString);
@@ -43,7 +43,53 @@ public static class TokenService
             IssuerSigningKey = new SymmetricSecurityKey(key),
         };
 
+        try
+        {
+            tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+
+            var jwtToken = validatedToken as JwtSecurityToken;
+            var expClaim = jwtToken?.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Exp)?.Value;
+
+            DateTime? expiry = null;
+            if (expClaim != null)
+            {
+                var expTime = long.Parse(expClaim);
+                expiry = DateTimeOffset.FromUnixTimeSeconds(expTime).UtcDateTime;
+            }
+
+            if (expiry < DateTime.UtcNow)
+                throw new UnauthorizedAccessException("Token expired");
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            throw new UnauthorizedAccessException("Invalid token", ex);
+        }        
+    }
+    
+    public static Guid GetUserIdFromToken(string token, string keyString)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(keyString);
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = false, // We just want to extract the claims, so no need to validate lifetime
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+        };
+
         var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-        return principal;
+        var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+
+        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            throw new UnauthorizedAccessException("Invalid token or user ID not found");
+        }
+
+        return userId;
     }
 }
